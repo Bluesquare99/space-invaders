@@ -1,52 +1,81 @@
 const invaders = document.querySelector(".invaders");
+const ship = document.querySelector(".ship");
+const modal = document.querySelector(".modal");
+
 invaders.style.top = 0;
 invaders.style.left = 0;
+ship.style.left = 0;
 
-console.log(window.innerWidth);
-console.log(document.documentElement.clientWidth);
-const vw = Math.max(
-  document.documentElement.clientWidth || 0,
-  window.innerWidth || 0
-);
+const blinkModal = setInterval(() => modal.classList.toggle("hidden"), 700);
 
-let invadersPosition = 0;
-let invadersDirection = "right";
+function hideModal() {
+  modal.classList.add("hidden");
+  clearInterval(blinkModal);
+}
 
-const shiftInvaders = () => {
-  if (invadersDirection === "right") {
-    invaders.style.left = `${parseInt(invaders.style.top) + 10}px`;
+let num = 0;
+invaders.addEventListener("click", () => {
+  if (num % 2 === 0) {
+    blinkModal();
+    num++;
+  } else {
+    clearBlink();
+    num++;
   }
-  invadersPosition += 10;
-  // else if (invadersDirection === "left") invadersPosition -= 10;
+});
 
-  // if (invadersPosition > vw - 960) {
-  //   invadersDirection = "left";
-  //   invaders.style.top = `${parseInt(invaders.style.top) + 40}px`;
-  // }
-  // if (invadersPosition < 0) {
-  //   invadersDirection = "right";
-  //   invaders.style.top = `${parseInt(invaders.style.top) + 40}px`;
-  // }
+// Defining move functions
+const moveLeft = () =>
+  (invaders.style.left = `${parseInt(invaders.style.left) - 1}px`);
+const moveRight = () =>
+  (invaders.style.left = `${parseInt(invaders.style.left) + 1}px`);
+let direction = "left";
+const moveDown = () =>
+  (invaders.style.top = `${parseInt(invaders.style.top) + 40}px`);
+
+const moveInvaders = () => {
+  setInterval(function () {
+    if (direction === "left") moveLeft();
+    if (direction === "right") moveRight();
+
+    // If invaders reach either side boundary, switch direction and shift down
+    if (invaders.getBoundingClientRect()["left"] < 60) {
+      direction = "right";
+      moveDown();
+    } else if (
+      window.innerWidth - invaders.getBoundingClientRect()["right"] <
+      60
+    ) {
+      direction = "left";
+      moveDown();
+    }
+  });
 };
-
-// const shiftInvaders = () => {
-//   setInterval(
-//     () => (invaders.style.left = `${parseInt(invaders.style.left) + 10}px`),
-//     120
-//   );
-// };
-
-// const shiftLeft = setInterval(function () {
-//   invaders.style.left = `${parseInt(invaders.style.left) + 10}px`;
-// }, 400);
 
 document.addEventListener(
   "click",
-  () =>
-    setInterval(function () {
-      console.log(invaders.style.left);
-      invaders.style.left = `${parseInt(invaders.style.left) + 1}px`;
-    }),
+  () => {
+    hideModal();
+    moveInvaders();
+  },
   500
 );
-console.log();
+
+document.addEventListener("keyup", (e) => {
+  if (e["key"] === "ArrowRight")
+    ship.style.left = `${parseInt(ship.style.left) + 80}px`;
+  else if (e["key"] === "ArrowLeft")
+    ship.style.left = `${parseInt(ship.style.left) - 80}px`;
+});
+console.log(invaders.getBoundingClientRect());
+
+console.log(ship.getBoundingClientRect());
+
+/*
+NEXT STEPS
+
+1. Create a bullet and allow it to be fired every so often
+2. The place it would be fired from needs to be positioned in the middle of the ship
+3. LATER Limit the number of bullets that can be fired per interval
+4. 
+*/
